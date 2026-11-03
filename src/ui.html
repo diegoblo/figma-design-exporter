@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Figma Design Exporter</title>
+    <style>
+      :root { color-scheme: light dark; font: 13px/1.45 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 20px; color: var(--figma-color-text, #1e1e1e); background: var(--figma-color-bg, #fff); }
+      h1 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: -.02em; }
+      .subtitle { margin: 4px 0 19px; color: var(--figma-color-text-secondary, #737373); font-size: 12px; }
+      fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+      legend, .section-label { display: block; margin: 0 0 8px; font-size: 11px; font-weight: 650; color: var(--figma-color-text-secondary, #656565); text-transform: uppercase; letter-spacing: .055em; }
+      .scope-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .scope-card { display: flex; align-items: center; gap: 8px; min-height: 42px; padding: 8px 10px; border: 1px solid var(--figma-color-border, #dedede); border-radius: 8px; cursor: pointer; }
+      .scope-card:has(input:checked) { border-color: #0d99ff; box-shadow: inset 0 0 0 1px #0d99ff; }
+      input { accent-color: #0d99ff; }
+      .options { display: grid; gap: 10px; margin: 18px 0; }
+      .check { display: flex; align-items: flex-start; gap: 9px; cursor: pointer; }
+      .check input { margin: 3px 0 0; flex: 0 0 auto; }
+      .check small { display: block; margin-top: 1px; color: var(--figma-color-text-secondary, #737373); font-size: 11px; }
+      .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 18px 0 14px; }
+      .metric { min-width: 0; padding: 10px 11px; border-radius: 8px; background: var(--figma-color-bg-secondary, #f5f5f5); }
+      .metric span { display: block; color: var(--figma-color-text-secondary, #737373); font-size: 11px; }
+      .metric strong { display: block; margin-top: 2px; font-size: 16px; font-variant-numeric: tabular-nums; }
+      .progress-wrap { height: 3px; margin: 10px 0; overflow: hidden; border-radius: 99px; background: var(--figma-color-bg-secondary, #eee); }
+      .progress { width: 0; height: 100%; background: #0d99ff; transition: width .2s ease; }
+      .status { min-height: 36px; margin: 8px 0 12px; color: var(--figma-color-text-secondary, #737373); font-size: 12px; }
+      .status.error { color: #c13b3b; }
+      .status.success { color: #16834b; }
+      .actions { display: grid; grid-template-columns: auto 1fr; gap: 8px; }
+      button { min-height: 36px; padding: 0 13px; border: 0; border-radius: 7px; font: inherit; font-weight: 600; cursor: pointer; }
+      button:disabled { cursor: default; opacity: .45; }
+      .primary { color: #fff; background: #0d99ff; }
+      .secondary { color: var(--figma-color-text, #222); background: var(--figma-color-bg-secondary, #eee); }
+      .hint { margin: 15px 0 0; padding-top: 12px; border-top: 1px solid var(--figma-color-border, #e5e5e5); color: var(--figma-color-text-secondary, #737373); font-size: 11px; }
+      @media (prefers-color-scheme: dark) { :root { color-scheme: dark; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Figma Design Exporter</h1>
+      <p class="subtitle">Exporta propiedades del diseño a un JSON local y consultable.</p>
+
+      <fieldset>
+        <legend>Alcance</legend>
+        <div class="scope-options">
+          <label class="scope-card"><input type="radio" name="scope" value="selection" checked /> Selección</label>
+          <label class="scope-card"><input type="radio" name="scope" value="page" /> Página actual</label>
+        </div>
+      </fieldset>
+
+      <section class="options" aria-label="Opciones">
+        <div class="section-label">Contenido</div>
+        <label class="check"><input id="includeInstanceChildren" type="checkbox" checked /><span>Capas internas de instancias<small>Incluye overrides y referencia a su componente principal.</small></span></label>
+        <label class="check"><input id="includeComponentChildren" type="checkbox" checked /><span>Capas de componentes y variantes<small>Conserva la jerarquía de sus definiciones dentro del alcance.</small></span></label>
+        <label class="check"><input id="includeComponents" type="checkbox" checked /><span>Detalles de componentes<small>Nombre, clave y propiedades de componentes referenciados.</small></span></label>
+        <label class="check"><input id="includeHidden" type="checkbox" /><span>Nodos ocultos<small>Puede aumentar el tamaño y el tiempo de análisis.</small></span></label>
+        <label class="check"><input id="compact" type="checkbox" checked /><span>JSON compacto<small>Desmárcalo para generar un archivo indentado y más legible.</small></span></label>
+      </section>
+
+      <div class="metrics" aria-live="polite">
+        <div class="metric"><span>Nodos exportados</span><strong id="nodeCount">—</strong></div>
+        <div class="metric"><span>Tamaño del JSON</span><strong id="fileSize">—</strong></div>
+      </div>
+      <div class="progress-wrap" aria-hidden="true"><div class="progress" id="progress"></div></div>
+      <div class="status" id="status" role="status" aria-live="polite">Preparando el análisis…</div>
+      <div class="actions">
+        <button class="secondary" id="refresh" type="button">Actualizar</button>
+        <button class="primary" id="export" type="button" disabled>Exportar JSON</button>
+      </div>
+      <p class="hint">El archivo se genera en este equipo. El plugin no envía el diseño a servicios externos.</p>
+    </main>
+    <!-- UI_BUNDLE -->
+  </body>
+</html>

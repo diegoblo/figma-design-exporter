@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.figma-design-exporter/schema/export-1.0.0.json",
+  "title": "Figma Design Exporter document",
+  "description": "Versioned, local representation of properties exposed by the Figma Plugin API.",
+  "type": "object",
+  "required": ["schemaVersion", "document", "roots", "nodes", "components", "styles", "tokens", "stats", "limitations"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "document": {
+      "type": "object",
+      "required": ["name", "page", "exportedAt", "scope", "childOrder"],
+      "properties": {
+        "name": { "type": "string" },
+        "page": {
+          "type": "object",
+          "required": ["id", "name"],
+          "properties": { "id": { "type": "string" }, "name": { "type": "string" } },
+          "additionalProperties": false
+        },
+        "exportedAt": { "type": "string", "format": "date-time" },
+        "scope": { "enum": ["selection", "page"] },
+        "childOrder": { "const": "back-to-front" }
+      },
+      "additionalProperties": false
+    },
+    "roots": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "nodes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["id", "name", "type", "childIds"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "parentId": { "type": "string" },
+          "childIds": { "type": "array", "items": { "type": "string" } },
+          "visible": { "type": "boolean" },
+          "locked": { "type": "boolean" },
+          "geometry": { "$ref": "#/$defs/jsonObject" },
+          "layout": { "$ref": "#/$defs/jsonObject" },
+          "appearance": { "$ref": "#/$defs/jsonObject" },
+          "text": { "$ref": "#/$defs/jsonObject" },
+          "styleRefs": { "$ref": "#/$defs/jsonObject" },
+          "componentRef": { "$ref": "#/$defs/jsonObject" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "components": { "$ref": "#/$defs/jsonObject" },
+    "styles": {
+      "type": "object",
+      "required": ["paints", "effects", "text", "local"],
+      "properties": {
+        "paints": { "$ref": "#/$defs/jsonObject" },
+        "effects": { "$ref": "#/$defs/jsonObject" },
+        "text": { "$ref": "#/$defs/jsonObject" },
+        "local": { "$ref": "#/$defs/jsonObject" }
+      },
+      "additionalProperties": false
+    },
+    "tokens": {
+      "type": "object",
+      "required": ["collections", "variables"],
+      "properties": {
+        "collections": { "$ref": "#/$defs/jsonObject" },
+        "variables": { "$ref": "#/$defs/jsonObject" }
+      },
+      "additionalProperties": false
+    },
+    "stats": {
+      "type": "object",
+      "required": ["nodeCount", "hiddenNodesOmitted", "childRootsOmittedByOptions", "estimatedBytes", "errors"],
+      "properties": {
+        "nodeCount": { "type": "integer", "minimum": 0 },
+        "hiddenNodesOmitted": { "type": "integer", "minimum": 0 },
+        "childRootsOmittedByOptions": { "type": "integer", "minimum": 0 },
+        "estimatedBytes": { "type": "integer", "minimum": 0 },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["phase", "message"],
+            "properties": { "nodeId": { "type": "string" }, "phase": { "type": "string" }, "message": { "type": "string" } },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "limitations": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "jsonObject": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/jsonValue" }
+    },
+    "jsonValue": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "type": "number" },
+        { "type": "string" },
+        { "type": "array", "items": { "$ref": "#/$defs/jsonValue" } },
+        { "$ref": "#/$defs/jsonObject" }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

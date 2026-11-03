@@ -1,0 +1,17 @@
+{
+  "name": "figma-design-exporter",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Exporta propiedades de Figma a JSON local para asistentes de IA.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "1.142.0",
+    "esbuild": "0.28.2",
+    "typescript": "6.0.3"
+  }
+}
